@@ -41,9 +41,7 @@ abstract class TweetSet {
     * Question: Can we implment this method here, or should it remain abstract
     * and be implemented in the subclasses?
     */
-  def filter(p: Tweet => Boolean): TweetSet = {
-    filterAcc(p, new Empty())
-  }
+  def filter(p: Tweet => Boolean): TweetSet = filterAcc(p, new Empty())
 
 
   /**
@@ -83,11 +81,9 @@ abstract class TweetSet {
     */
 
   def descendingByRetweet: TweetList = {
-    if(isEmpty) Nil
-    else {
-      val mostret = mostRetweeted
-      new Cons(mostret,remove(mostret).descendingByRetweet)
-    }
+    if (isEmpty) Nil
+    else
+      new Cons(mostRetweeted, remove(mostRetweeted).descendingByRetweet)
   }
 
   /**
@@ -118,11 +114,11 @@ abstract class TweetSet {
   def foreach(f: Tweet => Unit): Unit
 }
 
-/****************************************************************************************************/
+/** **************************************************************************************************/
 class Empty extends TweetSet {
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = acc
 
-  def isEmpty: Boolean=true
+  def isEmpty: Boolean = true
 
   def mostRetweeted: Tweet = {
     throw new java.util.NoSuchElementException
@@ -141,13 +137,15 @@ class Empty extends TweetSet {
   def foreach(f: Tweet => Unit): Unit = ()
 }
 
-/*****************************************************************************************************/
+/** ***************************************************************************************************/
 
 class NonEmpty(elem: Tweet, left: TweetSet, right: TweetSet) extends TweetSet {
 
   def filterAcc(p: Tweet => Boolean, acc: TweetSet): TweetSet = {
-    if (p(elem)) left.filterAcc(p, right.filterAcc(p, acc.incl(elem)))
-    else left.filterAcc(p, right.filterAcc(p, acc))
+    // TODO: We could find a better name
+    def traverse(set: TweetSet): TweetSet = left.filterAcc(p, right.filterAcc(p, set))
+
+    if (p(elem)) traverse(acc.incl(elem)) else traverse(acc)
   }
 
   def isEmpty: Boolean = false
